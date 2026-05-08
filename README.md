@@ -35,32 +35,6 @@ src/main/resources/
 
 ---
 
-## Setup
-
-1. Clone the repository
-2. In `application.properties`, fill in your Neon connection details:
-
-```properties
-spring.datasource.url=jdbc:postgresql://<your-neon-host>/neondb?sslmode=require
-spring.datasource.username=<your-neon-username>
-spring.datasource.password=<your-neon-password>
-spring.datasource.driver-class-name=org.postgresql.Driver
-
-spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-```
-
-3. Run the application:
-
-```bash
-./mvnw spring-boot:run
-```
-
-On first run, JPA will automatically create the `characters`, `character_aliases`, and `character_abilities` tables in your Neon database.
-
----
-
 ## API Endpoints
 
 Base URL: `http://localhost:8080/api/characters`
