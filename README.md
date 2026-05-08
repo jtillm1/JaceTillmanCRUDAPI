@@ -1,4 +1,212 @@
-# JaceTillmanCRUDAPI
-Assignment 3 for CSC 340. Generating a CRUD API, using Neon for database management. 
-Demo: 
-https://uncg-my.sharepoint.com/:v:/g/personal/jttillman_uncg_edu/IQB4nM4yrquEQLDq4c01UIlJAYV3JwUI05pkAjxF4W6Y_xg?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&e=0JtTUJ
+# VOID HUNTERS — Galactic Bounty Registry API
+
+A Spring Boot REST API backed by a Neon PostgreSQL database for the VOID HUNTERS character gallery. Supports full CRUD operations on bounty hunter character records.
+
+## 🎥 Demo
+
+[Watch the Demo Recording](https://uncg-my.sharepoint.com/:v:/g/personal/jttillman_uncg_edu/IQB4nM4yrquEQLDq4c01UIlJAYV3JwUI05pkAjxF4W6Y_xg?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&e=jDBSaU)
+
+---
+
+## Tech Stack
+
+- **Java 17** + **Spring Boot**
+- **Spring Data JPA** (Hibernate)
+- **Neon PostgreSQL** (cloud database)
+- **Maven**
+
+---
+
+## Project Structure
+
+```
+src/main/java/com/example/CrudApiApplication/
+├── model/
+│   └── Character.java
+├── repository/
+│   └── CharacterRepository.java
+├── service/
+│   └── CharacterService.java
+└── controller/
+    └── CharacterController.java
+src/main/resources/
+└── application.properties
+```
+
+---
+
+## Setup
+
+1. Clone the repository
+2. In `application.properties`, fill in your Neon connection details:
+
+```properties
+spring.datasource.url=jdbc:postgresql://<your-neon-host>/neondb?sslmode=require
+spring.datasource.username=<your-neon-username>
+spring.datasource.password=<your-neon-password>
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+```
+
+3. Run the application:
+
+```bash
+./mvnw spring-boot:run
+```
+
+On first run, JPA will automatically create the `characters`, `character_aliases`, and `character_abilities` tables in your Neon database.
+
+---
+
+## API Endpoints
+
+Base URL: `http://localhost:8080/api/characters`
+
+---
+
+### GET `/api/characters`
+Returns a list of all characters. Supports optional query parameters for filtering and searching.
+
+| Query Param | Description | Example |
+|-------------|-------------|---------|
+| `threatLevel` | Filter by threat level | `critical`, `high`, `medium`, `low` |
+| `status` | Filter by status | `at-large`, `captured`, `deceased`, `unknown` |
+| `search` | Search by name (case-insensitive) | `krix` |
+
+**Example requests:**
+```
+GET /api/characters
+GET /api/characters?threatLevel=critical
+GET /api/characters?status=at-large
+GET /api/characters?search=krix
+```
+
+**Example response:**
+```json
+[
+  {
+    "id": 1,
+    "name": "Krix the Hollow",
+    "alias": ["The Void Walker", "Null Entity"],
+    "species": "Nether-Born / Unknown",
+    "origin": "Sector 0, Dark Rift",
+    "height": "2.4m",
+    "threatLevel": "critical",
+    "bounty": 5100000,
+    "lastSeen": "Outer Rim Station 9",
+    "status": "at-large",
+    "abilities": ["Void Phase", "Matter Absorption", "Reality Fracture"],
+    "bio": "A sentient void entity capable of phasing through solid matter.",
+    "imageUrl": null,
+    "createdAt": "2897-01-15T00:00:00",
+    "updatedAt": "2897-01-15T00:00:00"
+  }
+]
+```
+
+---
+
+### GET `/api/characters/{id}`
+Returns a single character by their ID.
+
+```
+GET /api/characters/1
+```
+
+**404 response if not found:**
+```json
+{ "error": "Character not found with id: 1" }
+```
+
+---
+
+### POST `/api/characters`
+Creates a new character. `name` and `threatLevel` are required — all other fields are optional.
+
+```
+POST /api/characters
+Content-Type: application/json
+```
+
+**Request body:**
+```json
+{
+  "name": "Krix the Hollow",
+  "alias": ["The Void Walker", "Null Entity"],
+  "species": "Nether-Born / Unknown",
+  "origin": "Sector 0, Dark Rift",
+  "height": "2.4m",
+  "threatLevel": "critical",
+  "bounty": 5100000,
+  "lastSeen": "Outer Rim Station 9",
+  "status": "at-large",
+  "abilities": ["Void Phase", "Matter Absorption", "Reality Fracture"],
+  "bio": "A sentient void entity capable of phasing through solid matter.",
+  "imageUrl": null
+}
+```
+
+**Response:** `201 Created` with the full character object including the generated `id`, `createdAt`, and `updatedAt`.
+
+---
+
+### PUT `/api/characters/{id}`
+Fully replaces an existing character record. All fields should be provided.
+
+```
+PUT /api/characters/1
+Content-Type: application/json
+```
+
+**Request body:** same structure as POST.
+
+**Response:** `200 OK` with the updated character object.
+
+**404 response if not found:**
+```json
+{ "error": "Character not found with id: 1" }
+```
+
+---
+
+### DELETE `/api/characters/{id}`
+Removes a character from the registry.
+
+```
+DELETE /api/characters/1
+```
+
+**Response:**
+```json
+{ "message": "Character deleted successfully." }
+```
+
+**404 response if not found:**
+```json
+{ "error": "Character not found with id: 1" }
+```
+
+---
+
+## Character Schema
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `id` | Long | Auto | Generated by the database |
+| `name` | String | ✅ | Character's full name |
+| `alias` | List\<String\> | No | List of known aliases |
+| `species` | String | No | Species or classification |
+| `origin` | String | No | Home sector or planet |
+| `height` | String | No | e.g. `"2.4m"` |
+| `threatLevel` | String | ✅ | `critical`, `high`, `medium`, `low` |
+| `bounty` | Long | No | Bounty amount in credits |
+| `lastSeen` | String | No | Last known location |
+| `status` | String | No | `at-large`, `captured`, `deceased`, `unknown` |
+| `abilities` | List\<String\> | No | List of known abilities |
+| `bio` | String | No | Full biography |
+| `imageUrl` | String | No | URL to character image |
+| `createdAt` | LocalDateTime | Auto | Set on creation |
+| `updatedAt` | LocalDateTime | Auto | Updated on every save |
